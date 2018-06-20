@@ -4,7 +4,7 @@ import {
   inject,
   observer,
 } from 'mobx-react'
-
+import cookie_easy from 'react-easy-cookie'
 import Grid from 'material-ui/Grid'
 import Paper from 'material-ui/Paper'
 import List, { ListItem, ListItemText } from 'material-ui/List'
@@ -27,7 +27,7 @@ const TopicItem = (({ topic,onClick}) => {
   )
 });
 
-TopicItem.propTypes = {
+TopicItem.PropTypes = {
   topic: PropTypes.object.isRequired,
   onClick:PropTypes.func.isRequired
 }
@@ -47,6 +47,7 @@ class UserInfo extends React.Component {
     console.log('infoComonent')
   }
   componentWillMount() {
+   cookie_easy.setCookie('userName','123',30)
     let userId = cookie.loadAll();
     console.log(userId);
     if((!this.props.user.isLogin)){
@@ -133,11 +134,11 @@ class UserInfo extends React.Component {
   }
 }
 
-UserInfo.wrappedComponent.propTypes = {
+UserInfo.wrappedComponent.PropTypes = {
   appState: PropTypes.object.isRequired,
 };
 
-UserInfo.propTypes = {
+UserInfo.PropTypes = {
   classes: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
 };

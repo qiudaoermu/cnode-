@@ -64,7 +64,7 @@ const TopicListItem = ({onClick,topic})=>(
     </ListItem>
 )
 
-TopicListItem.propTypes ={
+TopicListItem.PropTypes ={
   onClick: PropTypes.func.isRequired,
   topic: PropTypes.object.isRequired,
 }

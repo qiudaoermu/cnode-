@@ -12,7 +12,7 @@ import Paper from 'material-ui/Paper'
 import Button from 'material-ui/Button'
 import IconReply from 'material-ui-icons/Reply'
 import { CircularProgress } from 'material-ui/Progress'
-
+import SimpleMde from 'react-simplemde-editor'
 import Container from '../layout/container'
 
 import { TopicStore } from '../../store/topic-store'
@@ -25,30 +25,32 @@ import Reply from './reply'
   return {
     topicStore: stores.topicStore,
     appState: stores.appState,
+    user:stores.appState.user
   }
 }) @observer
 class TopicDetail extends React.Component {
   static contextTypes = {
     router: PropTypes.object,
-  }
+  };
 
   constructor() {
-    super()
+    super();
     this.state = {
       newReply: '',
       showEditor: false,
-    }
-    this.handleNewReplyChange = this.handleNewReplyChange.bind(this)
-    this.goToLogin = this.goToLogin.bind(this)
-    this.handleReply = this.handleReply.bind(this)
+    };
+    this.handleNewReplyChange = this.handleNewReplyChange.bind(this);
+    this.goToLogin = this.goToLogin.bind(this);
+    this.handleReply = this.handleReply.bind(this);
+    this.doReply = this.doReply.bind(this)
   }
 
   componentDidMount() {
-    const id = this.props.match.params.id
-    console.log('component did mount id:', id) // eslint-disable-line
+    const id = this.props.match.params.id;
+    console.log('component did mount id:', id); // eslint-disable-line
     this.props.topicStore.getTopicDetail(id).catch(err => {
       console.log('detail did mount error:', err) // eslint-disable-line
-    })
+    });
     setTimeout(() => {
       this.setState({
         showEditor: true,
@@ -57,12 +59,12 @@ class TopicDetail extends React.Component {
   }
 
   getTopic() {
-    const id = this.props.match.params.id
+    const id = this.props.match.params.id;
     return this.props.topicStore.detailsMap[id]
   }
   asyncBootstrap() {
-    console.log('topic detail invoked') // eslint-disable-line
-    const id = this.props.match.params.id
+    console.log('topic detail invoked'); // eslint-disable-line
+    const id = this.props.match.params.id;
     return this.props.topicStore.getTopicDetail(id).then(() => {
       return true
     }).catch((err) => {
@@ -73,6 +75,8 @@ class TopicDetail extends React.Component {
   handleNewReplyChange(value) {
     this.setState({
       newReply: value,
+    },function () {
+        console.log(this.state.newReply)
     })
   }
 
@@ -86,29 +90,44 @@ class TopicDetail extends React.Component {
       .then(() => {
         this.setState({
           newReply: '',
-        })
+        });
         this.props.appState.notify({ message: '评论成功' })
       })
       .catch(() => {
         this.props.appState.notify({ message: '评论失败' })
       })
-    // axios.post('/api/')
-  }
 
+  }
+  gotoTopicId(){
+    return this.props.match.params.id
+  }
+  doReply(){
+        const  id = this.gotoTopicId();
+        const topic = this.props.topicStore.detailsMap[id];
+        console.log(topic);
+        console.log(this.state.newReply)
+        this.props.topicStore.doReply(this.state.newReply,topic.id).then(()=>{
+          this.setState({
+            newReply:'',
+          })
+        }).catch(err =>{
+          console.log(err)
+        })
+  }
   render() {
-    const topic = this.getTopic()
-    const classes = this.props.classes
+    const topic = this.getTopic();
+    const classes = this.props.classes;
+    const user = this.props.appState.user;
     if (!topic) {
       return (
         <Container>
           <section className={classes.loadingContainer}>
-            <CircularProgress color="accent" />
+            <CircularProgress color="secondary" />
           </section>
         </Container>
       )
     }
-    const createdReplies = topic.createdReplies
-    const user = this.props.appState.user
+
     return (
       <div>
         <Container>
@@ -122,28 +141,90 @@ class TopicDetail extends React.Component {
             <p dangerouslySetInnerHTML={{ __html: marked(topic.content) }} />
           </section>
         </Container>
+
+        {
+          this.props.topicStore.createdReplys && this.props.topicStore.createdReplys.length >0 ?
+            (
+              <Paper elevation={4} className={classes.replies}>
+                <header className={classes.replyHeader}>
+                  <span>我的鸡腿</span>
+                  <span>{`${this.props.topicStore.createdReplys.length}条`}</span>
+                </header>
+                {
+                  this.props.topicStore.createdReplys.map((reply) =>(
+                    <Reply reply={Object.assign({},reply,{
+                      author:{
+                        avatar_url:user.info.avatar_url,
+                        loginname: user.info.loginname
+                      }
+                    })}>
+
+                    </Reply>
+                    )
+
+                  )
+                }
+              </Paper>
+            ):''
+        }
         <Paper elevation={4} className={classes.replies}>
           <header className={classes.replyHeader}>
             <span>{`${topic.reply_count} 回复`}</span>
             <span>{`最新回复 ${topic.last_reply_at}`}</span>
           </header>
+
+
+
+          {user.isLogin&&
+              <section className={classes.replyEditor}>
+                <SimpleMde onChange={this.handleNewReplyChange}
+                           value={this.state.newReply}
+                           option={{
+                             toolbar:false,
+                             autoFocus:false,
+                             spellChecker:false,
+                             placeholder:"添加您的鸡腿"
+                           }}
+                />
+                <Button
+                  fab='true'
+                  color="primary"
+                  onClick={this.doReply} className={classes.replyButton}>
+                  <IconReply color="primary">
+                  </IconReply>
+                </Button>
+              </section>
+            }
+          {
+            !user.isLogin&&
+              <section className={classes.notLoginButton}>
+                <Button raised='true' color="secondary" onClick={this.goToLogin}>
+                  登录并进行回复
+                </Button>
+              </section>
+          }
           <section>
             {
               topic.replies.map(reply => <Reply reply={reply} key={reply.id} />)
             }
           </section>
+
+
+
+
         </Paper>
     </div>
     )
   }
 }
 
-TopicDetail.wrappedComponent.propTypes = {
+TopicDetail.wrappedComponent.PropTypes = {
+  user:PropTypes.object.isRequired,
   appState: PropTypes.object.isRequired,
   topicStore: PropTypes.instanceOf(TopicStore).isRequired,
 }
 
-TopicDetail.propTypes = {
+TopicDetail.PropTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
 }

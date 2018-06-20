@@ -31,7 +31,7 @@ export default class TopicList extends React.Component {
   constructor() {
     super();
     this.state ={
-      tab:'all'
+      newReply:''
     };
     console.log(this.props);
     this.changeTab = this.changeTab.bind(this)
@@ -128,7 +128,7 @@ export default class TopicList extends React.Component {
 }
 
 
-TopicList.wrappedComponent.propTypes = {
+TopicList.wrappedComponent.PropTypes = {
   appState: PropTypes.object.isRequired,
   topicStore:PropTypes.object.isRequired
 };

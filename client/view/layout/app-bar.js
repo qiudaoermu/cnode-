@@ -51,7 +51,7 @@ class MainAppBar extends React.Component{
         }
       }
       createButtonCLick(){
-
+        this.context.router.history.push('/topic/create')
       }
       render(){
        const { classes } = this.props;

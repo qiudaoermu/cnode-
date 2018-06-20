@@ -5,11 +5,15 @@ import {
   action,
   extendObservable,
 } from 'mobx'
-import  {topicSchema} from "../until/variable-define";
-import  {get} from "../until/http";
+import  {topicSchema,replySchema} from "../until/variable-define";
+import {get, post} from "../until/http";
 
 const createTopic = (topic) =>{
     return Object.assign({},topicSchema,topic)
+};
+
+const createReply = (reply) =>{
+  return Object.assign({},replySchema,reply)
 };
 class Topic {
     constructor(data){
@@ -25,11 +29,63 @@ class TopicStore {
   @observable topics;
   @observable details;
   @observable syncing;
+  @observable createdReplys = [];
+  @observable createdTopics = []
+  @action createTopic(title, tab, content) {
+    return new Promise((resolve, reject) => {
+      post('/topics', {
+        needAccessToken:true
+      },{
+        title, tab, content,
+      })
+        .then(data => {
+          if (data.success) {
+            const topic = {
+              title,
+              tab,
+              content,
+              id: data.topic_id,
+              create_at: Date.now(),
+            }
+            this.createdTopics.push(new Topic(createTopic(topic)))
+            resolve(topic)
+          } else {
+            reject(new Error(data.error_msg || '未知错误'))
+          }
+        })
+        .catch((err) => {
+          if (err.response) {
+            reject(new Error(err.response.data.error_msg || '未知错误'))
+          } else {
+            reject(new Error('未知错误'))
+          }
+        })
+    })
+  }
+  @action doReply(content,id){
+      return new Promise((resolve,reject) =>{
+        post(`/topic/${id}/replies`,{
+          accessToken:true
+        },{content}).
+          then(resp =>{
+            if(resp.success){
+                  this.createdReplys.push(createReply({
+                    id:resp.reply_id,
+                    content,
+                    create_at:Date.now()
+                  }));
+              resolve()
+            }else{
+            reject(resp)
+            }
+        }).catch(reject)
+      })
+  }
 
   constructor(syncing=false,topics=[],details=[]){
     this.syncing = syncing;
     this.topics = topics.map(topic => new Topic(createTopic(topic)))
-    this.details = details.map(topic => new Topic(createTopic(topic)))
+    this.details = details.map(detail => new Topic(createTopic(detail)))
   }
   addTopic(topic){
       this.topics.push(new Topic(createTopic(topic)))
@@ -37,8 +93,8 @@ class TopicStore {
 
   @computed get detailsMap() {
     return this.details.reduce((result, topic) => {
-      result[topic.id] = topic
-      return result
+      result[topic.id] = topic;
+      return result;
     }, {})
   }
 
@@ -52,8 +108,8 @@ class TopicStore {
             tab,
           }).then(resp =>{
             if(resp.success){
-              resp.data.forEach(topic =>{
-                this.addTopic(topic)
+              this.topics = resp.data.map(topic =>{
+                return new Topic(createTopic(topic))
               });
               this.syncing = false;
               resolve()

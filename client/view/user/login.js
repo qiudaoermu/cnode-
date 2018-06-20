@@ -10,6 +10,7 @@ import {
 import queryString from 'query-string'
 
 import cookie from 'react-cookies'
+import cook_easy from 'react-easy-cookie'
 
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
@@ -46,6 +47,7 @@ class UserLogin extends React.Component {
       return this.props.appState.login(userId.userId)
         .then(msg => {
           cookie.save('userId', msg.accessToken, { path: '/' });
+
           this.context.router.history.replace('/user/info')
         }).catch((error)=>{
           console.log(error)
@@ -120,7 +122,7 @@ class UserLogin extends React.Component {
   }
 }
 
-UserLogin.propTypes = {
+UserLogin.PropTypes = {
   classes: PropTypes.object.isRequired,
   appState: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,

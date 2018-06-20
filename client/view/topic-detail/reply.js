@@ -22,7 +22,7 @@ const Reply = ({ reply, classes }) => {
   )
 }
 
-Reply.propTypes = {
+Reply.PropTypes = {
   reply: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
 }

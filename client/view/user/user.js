@@ -46,11 +46,11 @@ class User extends React.Component {
   }
 }
 
-User.wrappedComponent.propTypes = {
+User.wrappedComponent.PropTypes = {
   user: PropTypes.object.isRequired,
 }
 
-User.propTypes = {
+User.PropTypes = {
   classes: PropTypes.object.isRequired,
   children: PropTypes.element.isRequired,
 }
