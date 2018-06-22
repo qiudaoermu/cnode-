@@ -1,4 +1,4 @@
-export const topicDetailStyle = (theme) => {
+export const topicDetailStyle = (theme) => { //eslint-disable-line
   return {
     header: {
       padding: 20,

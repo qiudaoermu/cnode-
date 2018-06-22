@@ -1,7 +1,7 @@
 const inputWidth = 300
 
-export default () => {
-  return {
+export default () => (
+   {
     root: {
       padding: '60px 20px',
       display: 'flex',
@@ -16,4 +16,4 @@ export default () => {
       width: inputWidth,
     },
   }
-}
+)

@@ -4,19 +4,18 @@ import {
   inject,
   observer,
 } from 'mobx-react'
-import cookie_easy from 'react-easy-cookie'
+// import cookie_easy from 'react-easy-cookie'
 import Grid from 'material-ui/Grid'
 import Paper from 'material-ui/Paper'
 import List, { ListItem, ListItemText } from 'material-ui/List'
 import Avatar from 'material-ui/Avatar'
 import Typography from 'material-ui/Typography'
 import { withStyles } from 'material-ui/styles'
-import cookie from 'react-cookies'
 import UserWrapper from './user'
 import infoStyles from './styles/user-info-style'
 
-const TopicItem = (({ topic,onClick}) => {
-  return (
+const TopicItem = (({ topic, onClick }) => (
+   (
     <ListItem button onClick={onClick}>
       <Avatar src={topic.author.avatar_url} />
       <ListItemText
@@ -25,46 +24,37 @@ const TopicItem = (({ topic,onClick}) => {
       />
     </ListItem>
   )
-});
+));
 
 TopicItem.PropTypes = {
   topic: PropTypes.object.isRequired,
-  onClick:PropTypes.func.isRequired
-}
+  onClick: PropTypes.func.isRequired,
+};
 
-@inject((stores) => {
-  return {
+@inject(stores => (
+   {
     user: stores.appState.user,
     appState: stores.appState,
   }
-}) @observer
+)) @observer
 class UserInfo extends React.Component {
   static contextTypes = {
     router: PropTypes.object,
   };
-  constructor(){
-    super()
-    console.log('infoComonent')
-  }
   componentWillMount() {
-   cookie_easy.setCookie('userName','123',30)
-    let userId = cookie.loadAll();
-    console.log(userId);
-    if((!this.props.user.isLogin)){
-     this.context.router.history.replace('/user/login')
-    }else{
+    // cookie_easy.setCookie('userName', '123', 30)
       this.props.appState.getUserDetail();
       this.props.appState.getUserCollection()
-    }
   }
-  goToTopic(id){
+  goToTopic(id) {
     this.context.router.history.push(`/detail/${id}`)
   }
   render() {
-    const classes = this.props.classes;
+    const { classes } = this.props;
     const topics = this.props.user.detail.recentTopics;
     const replies = this.props.user.detail.recentReplies;
-    const collections = this.props.user.collections.list;
+    const collections = this.props.user.collections.list; //eslint-disable-line
+    console.log(collections);
     return (
       <UserWrapper>
         <div className={classes.root}>
@@ -78,9 +68,10 @@ class UserInfo extends React.Component {
                   {
                     topics.length > 0 ?
                       topics.map(topic =>
-                        <TopicItem topic={topic}
-                         onClick={()=>{this.goToTopic(topic.id)}}
-                         key={topic.id} />) :
+                        (<TopicItem
+                          topic={topic}
+                          onClick={() => { this.goToTopic(topic.id) }}
+                          key={topic.id} />)) :
                       <Typography align="center">
                         最近没有发布过话题
                       </Typography>
@@ -97,9 +88,10 @@ class UserInfo extends React.Component {
                   {
                     replies.length > 0 ?
                       replies.map(topic =>
-                        <TopicItem topic={topic}
-                          onClick={()=>{this.goToTopic(topic.id)}}
-                          key={topic.id} />) :
+                        (<TopicItem
+                          topic={topic}
+                          onClick={() => { this.goToTopic(topic.id) }}
+                          key={topic.id} />)) :
                       <Typography align="center">
                         最近没有新的回复
                       </Typography>
@@ -116,10 +108,11 @@ class UserInfo extends React.Component {
                   {
                     collections.length > 0 ?
                       collections.map(topic =>
-                        <TopicItem topic={topic}
-                        onClick={()=>{this.goToTopic(topic.id)}}
-                        key={topic.id} />
-                      ) :
+                        (<TopicItem
+                          topic={topic}
+                          onClick={() => { this.goToTopic(topic.id) }}
+                          key={topic.id} />))
+                       :
                       <Typography align="center">
                         还么有收藏话题哦
                       </Typography>

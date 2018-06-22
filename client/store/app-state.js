@@ -1,119 +1,73 @@
 import {
   observable,
-  computed,
-  autorun,
-  action
+  action,
 } from 'mobx'
-import {post,get} from "../until/http";
+import { post, get } from '../until/http';
 
-export default class AppState{
-  @observable user={
-    isLogin:false,
-    info:{},
-    collections:{
-      list:[],
-      syncing:false
+export default class AppState {
+  @observable user = {
+    isLogin: false,
+    info: {},
+    collections: {
+      list: [],
+      syncing: false,
     },
-    detail:{
-      recentTopics:[],
-      recentReplies:[],
-      syncing:false
-    }
+    detail: {
+      recentTopics: [],
+      recentReplies: [],
+      syncing: false,
+    },
   };
-  @action login(accessToken) {
-    return new Promise((resolve, reject) => {
-      post('/user/login', {}, {accessToken})
-  .then(resp => {
-      if (resp.success) {
-        this.user.info = resp.data;
-        this.user.isLogin = true;
-        resolve(this.user.info)
-      } else {
-        reject(resp.data.msg)
-      }
-    })
-    .catch(err => {
-      if (err.response) {
-        reject(err.response.data.msg);
-      } else {
-        reject(err.message)
-      }
-    })
-  })
-  }
 
-  @action login2(accessToken) {
+  @action login( accessToken ) {
     return new Promise((resolve, reject) => {
-      post('/user/login', {},{accessToken})
-        .then(resp => {
+      post('/user/login', {}, { accessToken })
+        .then((resp) => {
           if (resp.success) {
-            this.user.isLogin = true;
-
             this.user.info = resp.data;
-
-            resolve()
+            this.user.isLogin = true;
+            resolve(this.user.info)
           } else {
             reject(resp.data.msg)
           }
-        }).catch(err => {
-        if (err.response) {
-          reject(err.response.data.msg);
-        } else {
-          reject(err.message)
-        }
-      })
+        })
+        .catch((err) => {
+          if (err.response) {
+            reject(err.response.data.msg);
+          } else {
+            reject(err.message)
+          }
+        })
     })
-  }
-
-  @action getUserDetail2(){
-     console.log(this.user.info.loginName);
-    this.user.detail.syncing = true;
-    return new Promise((resolve,reject) =>{
-      get(`/user/${this.user.info.loginName}`)
-    .then(resp =>{
-      if(resp.success){
-        this.user.detail.recentReplies = resp.data.recent_replies;
-        this.user.detail.recentTopics = resp.data.recent_topics;
-        resolve()
-      }else{
-        reject()
-      }
-      this.user.detail.syncing=false
-    })
-    .catch(err=>{
-      this.user.detail.syncing=false;
-      reject(err)
-    })
-  })
   }
 
 
   @action getUserDetail() {
-      this.user.detail.syncing = true;
-    console.log(this.user.info.loginName);
-      return new Promise((resolve, reject) => {
-        get(`/user/${this.user.info.loginName}`)
-          .then(resp => {
-            if (resp.success) {
-              this.user.detail.recentReplies = resp.data.recent_replies;
-              this.user.detail.recentTopics = resp.data.recent_topics;
+    this.user.detail.syncing = true;
+    return new Promise((resolve, reject) => {
+      get(`/user/${this.user.info.loginName}`)
+        .then((resp) => {
+          if (resp.success) {
+            this.user.detail.recentReplies = resp.data.recent_replies;
+            this.user.detail.recentTopics = resp.data.recent_topics;
 
-              resolve()
-            } else {
-              reject(resp)
-            }
-            this.user.detail.syncing = false
-          }).catch(err => {
-              reject(err.message);
-              this.user.detail.syncing = false
-        })
+            resolve()
+          } else {
+            reject(resp)
+          }
+          this.user.detail.syncing = false
+        }).catch((err) => {
+        reject(err.message);
+        this.user.detail.syncing = false
       })
-    }
+    })
+  }
+
   @action getUserCollection() {
-    this.user.collections.syncing = true
+    this.user.collections.syncing = true;
     return new Promise((resolve, reject) => {
       get(`/topic_collect/${this.user.info.loginName}`)
-        .then(resp => {
+        .then((resp) => {
           if (resp.success) {
             this.user.collections.list = resp.data;
             resolve()
@@ -121,12 +75,10 @@ export default class AppState{
             reject(resp)
           }
           this.user.collections.syncing = false
-        }).catch(err => {
-           reject(err.message);
-           this.user.collections.syncing = false
+        }).catch((err) => {
+        reject(err.message);
+        this.user.collections.syncing = false
       })
     })
   }
 }
-
-

@@ -4,9 +4,9 @@ import TopicStore from './topic-store'
 export { AppState, TopicStore }
 
 
-export const  createStoreMap = () =>{
-  return {
-    appState: new AppState(),
-    topicStore: new TopicStore()
-  }
-}
+export const createStoreMap = () => ({
+
+      appState: new AppState(),
+      topicStore: new TopicStore(),
+
+});

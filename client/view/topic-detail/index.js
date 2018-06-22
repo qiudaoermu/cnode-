@@ -13,21 +13,20 @@ import Button from 'material-ui/Button'
 import IconReply from 'material-ui-icons/Reply'
 import { CircularProgress } from 'material-ui/Progress'
 import SimpleMde from 'react-simplemde-editor'
-import Container from '../layout/container'
+import dateForm from 'dateformat'
 
+import Container from '../layout/container'
 import { TopicStore } from '../../store/topic-store'
 import { topicDetailStyle } from './styles'
 
 import Reply from './reply'
 
 
-@inject(stores => {
-  return {
-    topicStore: stores.topicStore,
-    appState: stores.appState,
-    user:stores.appState.user
-  }
-}) @observer
+@inject(stores => ({
+  topicStore: stores.topicStore,
+  appState: stores.appState,
+  user: stores.appState.user,
+})) @observer
 class TopicDetail extends React.Component {
   static contextTypes = {
     router: PropTypes.object,
@@ -37,7 +36,7 @@ class TopicDetail extends React.Component {
     super();
     this.state = {
       newReply: '',
-      showEditor: false,
+      showEditor: false,  //eslint-disable-line
     };
     this.handleNewReplyChange = this.handleNewReplyChange.bind(this);
     this.goToLogin = this.goToLogin.bind(this);
@@ -46,26 +45,25 @@ class TopicDetail extends React.Component {
   }
 
   componentDidMount() {
-    const id = this.props.match.params.id;
+    const { id } = this.props.match.params;
     console.log('component did mount id:', id); // eslint-disable-line
-    this.props.topicStore.getTopicDetail(id).catch(err => {
-      console.log('detail did mount error:', err) // eslint-disable-line
+    this.props.topicStore.getTopicDetail(id).catch((err) => {
+      console.log('detail did mount error:', err)  //eslint-disable-line
     });
     setTimeout(() => {
       this.setState({
-        showEditor: true,
+        showEditor: true,  //eslint-disable-line
       })
     }, 1000)
   }
 
   getTopic() {
-    const id = this.props.match.params.id;
+    const { id } = this.props.match.params;
     return this.props.topicStore.detailsMap[id]
   }
   asyncBootstrap() {
-    console.log('topic detail invoked'); // eslint-disable-line
-    const id = this.props.match.params.id;
-    return this.props.topicStore.getTopicDetail(id).then(() => {
+    const { id } = this.props.match.params;
+    return this.props.topicStore.getTopicDetail(id).then(() => {  //eslint-disable-line
       return true
     }).catch((err) => {
       throw err
@@ -75,8 +73,6 @@ class TopicDetail extends React.Component {
   handleNewReplyChange(value) {
     this.setState({
       newReply: value,
-    },function () {
-        console.log(this.state.newReply)
     })
   }
 
@@ -96,28 +92,23 @@ class TopicDetail extends React.Component {
       .catch(() => {
         this.props.appState.notify({ message: '评论失败' })
       })
-
   }
-  gotoTopicId(){
+  gotoTopicId() {
     return this.props.match.params.id
   }
-  doReply(){
-        const  id = this.gotoTopicId();
+  doReply() {
+        const id = this.gotoTopicId();
         const topic = this.props.topicStore.detailsMap[id];
-        console.log(topic);
-        console.log(this.state.newReply)
-        this.props.topicStore.doReply(this.state.newReply,topic.id).then(()=>{
+        this.props.topicStore.doReply(this.state.newReply, topic.id).then(() => {
           this.setState({
-            newReply:'',
+            newReply: '',
           })
-        }).catch(err =>{
-          console.log(err)
         })
   }
   render() {
     const topic = this.getTopic();
-    const classes = this.props.classes;
-    const user = this.props.appState.user;
+    const { classes } = this.props;
+    const { user } = this.props.appState;
     if (!topic) {
       return (
         <Container>
@@ -141,9 +132,8 @@ class TopicDetail extends React.Component {
             <p dangerouslySetInnerHTML={{ __html: marked(topic.content) }} />
           </section>
         </Container>
-
         {
-          this.props.topicStore.createdReplys && this.props.topicStore.createdReplys.length >0 ?
+          this.props.topicStore.createdReplys && this.props.topicStore.createdReplys.length > 0 ?
             (
               <Paper elevation={4} className={classes.replies}>
                 <header className={classes.replyHeader}>
@@ -151,54 +141,52 @@ class TopicDetail extends React.Component {
                   <span>{`${this.props.topicStore.createdReplys.length}条`}</span>
                 </header>
                 {
-                  this.props.topicStore.createdReplys.map((reply) =>(
-                    <Reply reply={Object.assign({},reply,{
-                      author:{
-                        avatar_url:user.info.avatar_url,
-                        loginname: user.info.loginname
-                      }
+                  this.props.topicStore.createdReplys.map((reply) => (  //eslint-disable-line
+                    <Reply reply={Object.assign({}, reply, {
+                      author: {
+                        avatar_url: user.info.avatar_url,
+                        loginname: user.info.loginname,
+                      },
                     })}>
-
                     </Reply>
-                    )
-
+                    ),
                   )
                 }
               </Paper>
-            ):''
+            ) : ''
         }
         <Paper elevation={4} className={classes.replies}>
           <header className={classes.replyHeader}>
             <span>{`${topic.reply_count} 回复`}</span>
-            <span>{`最新回复 ${topic.last_reply_at}`}</span>
+            <span>{`最新回复 ${dateForm(topic.last_reply_at, 'yy-dd-mm')}`}</span>
           </header>
-
-
-
-          {user.isLogin&&
+          { user.isLogin &&
               <section className={classes.replyEditor}>
-                <SimpleMde onChange={this.handleNewReplyChange}
-                           value={this.state.newReply}
-                           option={{
-                             toolbar:false,
-                             autoFocus:false,
-                             spellChecker:false,
-                             placeholder:"添加您的鸡腿"
-                           }}
+                <SimpleMde
+                  onChange={this.handleNewReplyChange}
+                  value={this.state.newReply}
+                  option={{
+                     toolbar: false,
+                     autoFocus: false,
+                     spellChecker: false,
+                     placeholder: '添加您的鸡腿',
+                  }}
                 />
                 <Button
-                  fab='true'
+                  fab="true"
                   color="primary"
-                  onClick={this.doReply} className={classes.replyButton}>
+                  onClick={this.doReply}
+                  className={classes.replyButton}>
                   <IconReply color="primary">
+
                   </IconReply>
                 </Button>
               </section>
             }
           {
-            !user.isLogin&&
+            !user.isLogin &&
               <section className={classes.notLoginButton}>
-                <Button raised='true' color="secondary" onClick={this.goToLogin}>
+                <Button raised="true" color="secondary" onClick={this.goToLogin}>
                   登录并进行回复
                 </Button>
               </section>
@@ -208,25 +196,21 @@ class TopicDetail extends React.Component {
               topic.replies.map(reply => <Reply reply={reply} key={reply.id} />)
             }
           </section>
-
-
-
-
         </Paper>
-    </div>
+      </div>
     )
   }
 }
 
 TopicDetail.wrappedComponent.PropTypes = {
-  user:PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
   appState: PropTypes.object.isRequired,
   topicStore: PropTypes.instanceOf(TopicStore).isRequired,
-}
+};
 
 TopicDetail.PropTypes = {
   match: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
-}
+};
 
 export default withStyles(topicDetailStyle)(TopicDetail)

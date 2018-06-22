@@ -1,7 +1,7 @@
 import avatarBg from './bg.jpg'
 
-export default () => {
-  return {
+export default () => (
+   {
     root: {},
     avatar: {
       position: 'relative',
@@ -43,4 +43,4 @@ export default () => {
       },
     },
   }
-}
+)

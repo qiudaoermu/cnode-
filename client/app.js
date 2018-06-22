@@ -2,65 +2,65 @@ import React from 'react' //eslint-disable-line
 import ReactDOM from 'react-dom' //eslint-disable-line
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'mobx-react'
-import App from './view/App.jsx';
+
 
 import { AppContainer } from 'react-hot-loader' //eslint-disable-line
 // ReactDOM.hydrate(<App/>,document.getElementById('root'));
+import { MuiThemeProvider, createMuiTheme } from 'material-ui'
+import { lightBlue, pink } from 'material-ui/colors'
+import { AppState, TopicStore } from './store/store'
 
-import {AppState,TopicStore} from './store/store'
+import App from './view/App.jsx';
 
-
-import { MuiThemeProvider,createMuiTheme} from 'material-ui'
-import { lightBlue,pink } from  'material-ui/colors'
-import TestApi from  './view/test/api-test'
-const theme =createMuiTheme({
-  palette:{
-    primary:pink,
+const theme = createMuiTheme( {
+  palette: {
+    primary: pink,
     accent: lightBlue,
-    type:'light'
-  }
-});
+    type: 'light',
+  },
+} );
 
-const initialState =   window.__INITIAL_STATE__||{}
-console.log(initialState)
-const createApp = (TheApp) => {
+const initialState = window.__INITIAL_STATE__ || {};
+
+const createApp = ( TheApp ) => {
   class Main extends React.Component {
     // Remove the server-side injected CSS.
     componentDidMount() {
-      const jssStyles = document.getElementById('jss-server-side');
-      if (jssStyles && jssStyles.parentNode) {
-        jssStyles.parentNode.removeChild(jssStyles);
+      const jssStyles = document.getElementById( 'jss-server-side' );
+      if ( jssStyles && jssStyles.parentNode ) {
+        jssStyles
+        .parentNode
+        .removeChild( jssStyles );
       }
     }
+
     render() {
       return <TheApp />
     }
   }
+
   return Main
 };
-const appState = new AppState();
-const topicStore = new TopicStore()
-const root = document.getElementById('root');
-console.log(appState)
-const render = Component => {
-  ReactDOM.render(
+const appState = new AppState( initialState );
+const topicStore = new TopicStore( initialState )
+const root = document.getElementById( 'root' );
+const render = ( Component ) => {
+  ReactDOM.hydrate(
     <AppContainer>
-      <Provider appState={appState} topicStore={topicStore} >
-          <BrowserRouter>
-            <MuiThemeProvider theme={theme}>
-              <Component />
-            </MuiThemeProvider>
-          </BrowserRouter>
+      <Provider appState={appState} topicStore={topicStore}>
+        <BrowserRouter>
+          <MuiThemeProvider theme={theme}>
+            <Component />
+          </MuiThemeProvider>
+        </BrowserRouter>
       </Provider>
-    </AppContainer>,
-    root
-  )
+    </AppContainer>, root )
 };
 
-render(createApp(App));
-if(module.hot){
-  module.hot.accept('./view/App', () => {
-    const NextApp = require('./view/App').default;
-    render(createApp(NextApp))
-  })
+render( createApp( App ) );
+if ( module.hot ) {
+  module.hot.accept( './view/App', () => {
+      const NextApp = require( './view/App' ).default;
+      render( createApp( NextApp ) )
+    } )
 }

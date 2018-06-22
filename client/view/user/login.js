@@ -4,13 +4,10 @@ import {
   inject,
   observer,
 } from 'mobx-react'
-import {
-  Redirect,
-} from 'react-router-dom'
-import queryString from 'query-string'
-
-import cookie from 'react-cookies'
-import cook_easy from 'react-easy-cookie'
+import { Redirect } from 'react-router-dom'
+import QueryString from 'query-string'
+// import cookie from 'react-cookies'
+// import cook_easy from 'react-easy-cookie'
 
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
@@ -18,18 +15,18 @@ import { withStyles } from 'material-ui/styles'
 import UserWrapper from './user'
 import loginStyles from './styles/login-style'
 
-@inject((stores => {
-  return {
-    appState:stores.appState,
-    user:stores.appState.user
+@inject((stores => (
+   {
+    appState: stores.appState,
+    user: stores.appState.user,
   }
-})) @observer
+))) @observer
 
 
 class UserLogin extends React.Component {
   static contextTypes = {
     router: PropTypes.object,
-  }
+  };
 
   constructor() {
     super();
@@ -37,27 +34,13 @@ class UserLogin extends React.Component {
       accessToken: '',
       helpText: '',
     };
-    this.handleLogin = this.handleLogin.bind(this)
+    this.handleLogin = this.handleLogin.bind(this);
     this.handleInput = this.handleInput.bind(this)
-  }
-  componentWillMount(){
-    let userId = cookie.loadAll();
-    console.log(userId);
-    if(this.props.user.isLogin||userId){
-      return this.props.appState.login(userId.userId)
-        .then(msg => {
-          cookie.save('userId', msg.accessToken, { path: '/' });
-
-          this.context.router.history.replace('/user/info')
-        }).catch((error)=>{
-          console.log(error)
-        })
-    }
   }
 
   getFrom(location) {
-    location = location || this.props.location
-    const query = queryString.parse(location.search)
+    const locations = location || this.props.location;
+    const query = QueryString.parse(locations.search);
     return query.from || '/user/info'
   }
 
@@ -71,10 +54,7 @@ class UserLogin extends React.Component {
       helpText: '',
     });
     return this.props.appState.login(this.state.accessToken)
-      .then(msg => {
-        cookie.save('userId', msg.accessToken, { path: '/' });
-        this.context.router.history.replace('/user/info')
-      }).catch((error)=>{
+     .catch((error) => {
         console.log(error)
       })
   }
@@ -86,8 +66,8 @@ class UserLogin extends React.Component {
   }
 
   render() {
-    const classes = this.props.classes;
-    const isLogin = this.props.user.isLogin;
+    const { classes } = this.props;
+    const { isLogin } = this.props.user;
     const from = this.getFrom();
 
     if (isLogin) {
@@ -109,7 +89,7 @@ class UserLogin extends React.Component {
             className={classes.input}
           />
           <Button
-            raised = 'true'
+            raised="true"
             color="primary"
             onClick={this.handleLogin}
             className={classes.loginButton}
@@ -129,9 +109,9 @@ UserLogin.PropTypes = {
   location: PropTypes.object.isRequired,
 };
 
-export default withStyles(loginStyles)(inject((stores) => {
-  return {
+export default withStyles(loginStyles)(inject(stores => (
+   {
     appState: stores.appState,
     user: stores.appState.user,
   }
-})(observer(UserLogin)))
+))(observer(UserLogin)))
